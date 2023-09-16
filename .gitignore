@@ -1,1 +1,9 @@
 *.~undo-tree~
+/CLionProjects/
+/Desktop/
+/Documents/
+/Downloads/
+/Dropbox/
+/bin/
+/.dotfiles/
+/.emacs.d/
