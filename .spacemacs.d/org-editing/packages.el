@@ -220,12 +220,14 @@ super/subscript"
           "Advice to source .env file before executing shell commands in Org-mode source blocks."
           (let* ((dir (or (cdr (assoc :dir params)) default-directory))
                  (remote (file-remote-p dir))
-                 (env-file-path (expand-file-name ".env" dir))
-                 (sourced-body (if remote
-                                   ;; For remote execution, use tramp-sh-handle-remote-process-environment
-                                   (format "set -a; . %s; set +a; %s" (substring env-file-path (length remote)) body)
-                                 ;; For local execution, source the .env file normally
-                                 (format "set -a; . '%s'; set +a; %s" env-file-path body))))
+                 (env-file-path (if remote
+                                    (tramp-file-name-localname (tramp-dissect-file-name (expand-file-name ".env" dir)))
+                                  (expand-file-name ".env" dir)))
+                 (env-file-exists (file-exists-p (if remote (concat remote env-file-path) env-file-path)))
+                 (sourced-body (if env-file-exists
+                                   (format "set -a; . '%s'; set +a; %s" env-file-path body)
+                                 ;; If the .env file does not exist, just use the original body
+                                 body)))
             (funcall original-func sourced-body params)))
 
 
