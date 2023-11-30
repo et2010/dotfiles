@@ -213,6 +213,25 @@ super/subscript"
     (progn
       ;; replace fundamental mode by graphiz one
       (setq org-src-lang-modes
-            (append '(("conf" . conf)) org-src-lang-modes)))))
+            (append '(("conf" . conf)) org-src-lang-modes))
+
+      (with-eval-after-load 'org
+        (defun org-babel-execute:sh-with-env (original-func body params)
+          "Advice to source .env file before executing shell commands in Org-mode source blocks."
+          (let* ((dir (or (cdr (assoc :dir params)) default-directory))
+                 (remote (file-remote-p dir))
+                 (env-file-path (expand-file-name ".env" dir))
+                 (sourced-body (if remote
+                                   ;; For remote execution, use tramp-sh-handle-remote-process-environment
+                                   (format "set -a; . %s; set +a; %s" (substring env-file-path (length remote)) body)
+                                 ;; For local execution, source the .env file normally
+                                 (format "set -a; . '%s'; set +a; %s" env-file-path body))))
+            (funcall original-func sourced-body params)))
+
+
+        (advice-add 'org-babel-execute:sh :around #'org-babel-execute:sh-with-env))
+      )))
+
+(defun org-editing/po)
 
 ;;; packages.el ends here
