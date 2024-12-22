@@ -11,7 +11,7 @@
 	// "disable-hardware-acceleration": true,
 
 	// Use gnome-keyring as the password storage.
-	"password-store": "gnome-keyring",
+	"password-store": "gnome-libsecret",
 
 	// Allows to disable crash reporting.
 	// Should restart the app if the value is changed.
